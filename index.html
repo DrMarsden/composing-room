@@ -1,0 +1,867 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Composing Room</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=UnifrakturMaguntia&family=Libre+Franklin:wght@400;600&display=swap">
+<style>
+/* Layout: copy and galley on the imposing stone up top, the stick pinned beneath them, the job case filling the width at the hands. */
+:root{
+  --ground:#d5d9d4; --panel:#e5e8e3; --ink:#1c2023; --muted:#525a5e; --rule:#b3bab5;
+  --wood:#9a6a3f; --wood-deep:#6b4325; --box:#b98755; --box-ink:#23150a;
+  --metal:#a9b0b7; --metal-hi:#cfd5da; --metal-lo:#77808a; --space:#858d96; --type-ink:#14161a; --bed:#33383c;
+  --brass:#b6923f; --brass-deep:#8a6b27;
+  --paper:#f2eee1; --print:#17130f;
+  --ok:#2c6a3d; --warn:#8a5600; --bad:#a1271c; --mark:#2347a0;
+  --display:"IM Fell English SC","IM Fell English",Georgia,serif;
+  --text:"IM Fell English",Georgia,"Times New Roman",serif;
+  --ui:"Libre Franklin","Helvetica Neue",Arial,sans-serif;
+  --mpt:240;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ground:#1b1d1e; --panel:#25282a; --ink:#e8e6e0; --muted:#a3a9ab; --rule:#3c4144;
+  --wood:#6a4628; --wood-deep:#3d2614; --box:#7d5632; --box-ink:#f5e7d2;
+  --metal:#838b93; --metal-hi:#a7afb6; --metal-lo:#4d555c; --space:#5c646c; --type-ink:#0e1013; --bed:#121416;
+  --brass:#a98739; --brass-deep:#6f5620;
+  --paper:#e9e4d3; --print:#17130f;
+  --ok:#74c389; --warn:#e2ab4f; --bad:#f08c7e; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --ground:#1b1d1e; --panel:#25282a; --ink:#e8e6e0; --muted:#a3a9ab; --rule:#3c4144;
+  --wood:#6a4628; --wood-deep:#3d2614; --box:#7d5632; --box-ink:#f5e7d2;
+  --metal:#838b93; --metal-hi:#a7afb6; --metal-lo:#4d555c; --space:#5c646c; --type-ink:#0e1013; --bed:#121416;
+  --brass:#a98739; --brass-deep:#6f5620;
+  --paper:#e9e4d3; --print:#17130f;
+  --ok:#74c389; --warn:#e2ab4f; --bad:#f08c7e; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:14px 40px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+button,select,textarea{font:inherit;color:inherit}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 24px}
+.top h1{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.05;margin:0;letter-spacing:.02em;text-wrap:balance}
+.top p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-left:auto}
+.lab{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field{display:flex;align-items:center;gap:6px}
+select{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:7px 8px;min-height:38px}
+.seg{display:inline-flex;border:1px solid var(--wood-deep);border-radius:4px;overflow:hidden}
+.seg button{background:var(--wood);color:var(--box-ink);border:0;border-right:1px solid var(--wood-deep);padding:7px 12px;min-height:38px;font-size:14px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--box);font-weight:600;box-shadow:inset 0 -3px 0 var(--brass)}
+.chk{display:inline-flex;align-items:center;gap:6px;min-height:38px;font-size:14px}
+.chk input{width:18px;height:18px;accent-color:var(--brass-deep)}
+
+.btn{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:8px 13px;min-height:42px;font-weight:600;font-size:14px}
+.btn.main{background:var(--brass);border-color:var(--brass-deep);color:#1b1405}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.sq{min-width:44px;padding-inline:8px}
+
+.upper{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:14px}
+@media (max-width:760px){.upper{grid-template-columns:minmax(0,1fr)}}
+.pane{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.pane header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.pane h2{font-family:var(--display);font-weight:400;font-size:19px;margin:0;letter-spacing:.03em}
+.copytext{font-family:var(--text);font-size:19px;line-height:1.35;white-space:pre-wrap;margin:0;max-height:210px;overflow:auto}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+textarea{width:100%;min-height:120px;background:var(--paper);color:var(--print);border:1px solid var(--rule);border-radius:3px;padding:8px;font-family:var(--text);font-size:18px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+.bedwrap{background:var(--bed);border-radius:3px;padding:10px;max-height:250px;overflow:auto;min-height:74px}
+.paperwrap{background:var(--paper);border-radius:2px;padding:18px 16px;max-height:250px;overflow:auto;min-height:74px;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.measure{width:100%;max-width:calc(var(--mpt) * 2.3px);display:flex;flex-direction:column}
+.flip{transform:scaleY(-1)}
+.line{display:flex;height:calc(var(--u) * 12px);flex:none}
+.bedwrap .line{cursor:pointer}
+.lead{height:calc(var(--u) * 2px);background:var(--metal-lo);flex:none}
+.paperwrap .lead{background:none}
+.empty{color:var(--metal-hi);font-size:13.5px;margin:0}
+.paperwrap .empty{color:#5a5347}
+
+.sort{flex:none;position:relative;height:calc(var(--u) * 12px);background:linear-gradient(180deg,var(--metal-hi),var(--metal));box-shadow:inset -1px 0 0 var(--metal-lo)}
+.sort .g{position:absolute;left:0;top:0;font-size:calc(var(--u) * 12px);line-height:calc(var(--u) * 12px);white-space:nowrap;color:var(--type-ink);pointer-events:none}
+.sort.sp{background:var(--space);box-shadow:inset 0 0 0 1px var(--metal-lo)}
+.sort.sel{outline:2px solid var(--brass);outline-offset:1px;z-index:2;filter:brightness(1.15)}
+.paperwrap .sort{background:none;box-shadow:none}
+.paperwrap .sort .g{color:var(--print)}
+.prooflay{display:grid;grid-template-columns:minmax(0,calc(var(--mpt) * 2.3px));gap:14px;align-items:start}
+.prooflay.marked{grid-template-columns:minmax(0,calc(var(--mpt) * 2.3px)) minmax(70px,1fr)}
+.margin{display:flex;flex-direction:column;font-family:var(--text);color:var(--mark);min-width:0}
+.margin[hidden]{display:none}
+.mline{height:calc(var(--u) * 12px);display:flex;align-items:center;gap:.6em;white-space:nowrap;font-size:17px;flex:none}
+.mlead{flex:none}
+.paperwrap .sort.err::after{content:"";position:absolute;inset:-3px -2px;border:1.5px solid var(--mark);border-radius:50%;pointer-events:none}
+.caret{position:absolute;bottom:calc(var(--u) * -3px);color:var(--mark);font-family:var(--ui);font-weight:600;font-size:calc(var(--u) * 9px);line-height:1;pointer-events:none}
+.caret.b{left:calc(var(--u) * -2.5px)} .caret.a{right:calc(var(--u) * -2.5px)}
+.ab{margin:0;font-family:var(--text);font-style:italic;font-size:17px;line-height:1.3;color:var(--ink)}
+.ab span{font-style:normal;color:var(--brass-deep);margin-right:.35em}
+.box.hintbox{box-shadow:inset 0 0 0 5px var(--brass),inset 0 2px 3px rgba(0,0,0,.28);animation:glow 1s ease-in-out infinite}
+@keyframes glow{50%{filter:brightness(1.25)}}
+.box.shake{animation:shake .25s}
+@media (prefers-reduced-motion:reduce){.box.hintbox,.box.shake{animation:none}}
+#exportBox{min-height:90px;font-size:15px}
+.coach{display:flex;gap:12px;align-items:flex-start;background:var(--ink);color:var(--ground);border-radius:4px;padding:12px 14px}
+.coach[hidden]{display:none}
+.coach .fist{font-size:34px;line-height:1;color:var(--brass);flex:none}
+.coachbody{min-width:0;flex:1}
+.coach .who{font-family:var(--display);font-size:15px;letter-spacing:.05em;color:var(--brass)}
+.coach .say{font-family:var(--text);font-size:18px;line-height:1.38;margin:3px 0 10px;max-width:78ch;min-height:2.7em}
+.coach .btn{background:transparent;color:var(--ground);border-color:var(--muted);min-height:38px}
+.coach .btn.main{background:var(--brass);color:#1b1405;border-color:var(--brass-deep)}
+.coachstep{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+body.demo .wrap > :not(.stickpane), body.demo .stickrow{pointer-events:none}
+#hand{position:fixed;left:0;top:0;width:30px;height:30px;border-radius:50%;border:3px solid var(--brass);background:rgba(182,146,63,.3);z-index:30;pointer-events:none;transition:transform .08s linear}
+#hand::before{content:"☞";position:absolute;right:100%;top:-9px;font-size:28px;color:var(--brass-deep);font-family:Georgia,serif}
+#hand.tap{animation:tap .14s}
+@keyframes tap{50%{scale:.55}}
+@media (prefers-reduced-motion:reduce){#hand{transition:none}#hand.tap{animation:none}}
+.legend{font-size:12.5px;color:var(--muted);margin:0}
+.legend b{color:var(--mark);font-family:var(--text);font-size:15px;font-weight:400}
+.f-roman{font-family:"IM Fell English",Georgia,serif}
+.f-italic{font-family:"IM Fell English",Georgia,serif;font-style:italic}
+.f-black{font-family:"UnifrakturMaguntia","Old English Text MT",Georgia,serif}
+
+.stickpane{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);padding-block:8px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule)}
+.status{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;font-size:14px;min-height:21px}
+.status b{font-weight:600}
+.st-ok{color:var(--ok)} .st-warn{color:var(--warn)} .st-bad{color:var(--bad)}
+.stickrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.stick{display:flex;align-items:stretch;flex:1 1 420px;min-width:0;max-width:calc(var(--mpt) * 3.4px + 54px);border-top:9px solid var(--brass-deep);background:var(--brass);border-radius:2px;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.stick .head{flex:none;width:12px;background:var(--brass-deep)}
+.stick .knee{flex:none;width:42px;background:var(--brass-deep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#f3e3b5;font-size:10.5px;line-height:1.1;text-align:center}
+.stick .knee i{width:13px;height:13px;border-radius:50%;background:var(--brass);box-shadow:inset 0 0 0 2px var(--brass-deep),inset 0 0 0 3px #e7cf8a;display:block}
+.trackwrap{flex:1;min-width:0;background:var(--bed);padding:7px 0;position:relative}
+.track{display:flex;width:100%;min-height:calc(var(--u) * 12px)}
+.hint{position:absolute;inset:0;display:flex;align-items:center;padding-left:12px;color:var(--metal-hi);font-size:13.5px;pointer-events:none}
+.shake{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.sort.new{animation:drop .16s ease-out}
+@keyframes drop{from{opacity:.2}}
+.fly{position:fixed;z-index:20;width:24px;height:24px;background:var(--metal-hi);color:var(--type-ink);font-size:20px;line-height:24px;text-align:center;pointer-events:none;box-shadow:0 2px 5px rgba(0,0,0,.4)}
+@media (prefers-reduced-motion:reduce){.shake,.sort.new{animation:none}}
+
+.case{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;background:var(--wood-deep);padding:7px;border-radius:3px;user-select:none;-webkit-user-select:none}
+.bay{display:grid;gap:3px;background:var(--wood);height:clamp(270px,29vw,350px);container-type:inline-size}
+.bay.l{grid-template-columns:repeat(26,1fr);grid-template-rows:repeat(14,1fr)}
+.bay.m{grid-template-columns:repeat(24,1fr);grid-template-rows:repeat(14,1fr)}
+.bay.r{grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(5,1fr)}
+@media (max-width:999px){.case{grid-template-columns:repeat(2,minmax(0,1fr))}.bay{height:clamp(260px,44vw,360px)}.bay.r{grid-column:1 / -1;height:clamp(230px,34vw,290px)}}
+@media (max-width:639px){.case{grid-template-columns:minmax(0,1fr)}.bay,.bay.r{grid-column:auto;height:300px}}
+.box{position:relative;min-width:0;min-height:0;border:0;padding:0;background:var(--box);color:var(--box-ink);box-shadow:inset 0 2px 3px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.box:active{filter:brightness(1.18)}
+.box .g{font-size:21px;font-size:clamp(17px,8cqw,30px);line-height:1}
+.box.spc .g{font-family:var(--ui);font-size:10.5px;font-size:clamp(9.5px,3.4cqw,12.5px);line-height:1.1;letter-spacing:.02em;text-align:center;padding:0 1px}
+.box .n{position:absolute;right:2px;bottom:1px;font-family:var(--ui);font-size:9px;opacity:.6;font-variant-numeric:tabular-nums}
+.box.out .g{opacity:.3}
+.blind .box .g,.blind .box .n{visibility:hidden}
+.casehead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+
+details{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:10px 14px}
+summary{font-family:var(--display);font-size:18px;cursor:pointer}
+details ol{margin:10px 0 4px;padding-left:22px;max-width:68ch}
+details li{margin-bottom:6px}
+details p{max-width:68ch;color:var(--muted);font-size:13.5px}
+/* Workbench: on a tablet-sized screen (the script sets html.bench) everything fits at once; only the copy and galley panes scroll. */
+html{background:var(--ground)}
+html.bench,html.bench body{height:100%}
+html.bench body{overflow:hidden;padding-block:10px}
+html.bench .wrap{height:100%;max-width:none;display:grid;gap:10px;grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto minmax(150px,24%) auto auto minmax(0,1fr);grid-template-areas:"top" "upper" "stick" "casehead" "case"}
+html.bench .top{grid-area:top;gap:6px 18px;align-items:center}
+html.bench .top h1{font-size:23px} html.bench .top p{display:none}
+html.bench .ctl{gap:6px 12px}
+html.bench .ctl select,html.bench .ctl .btn,html.bench .ctl .seg button{min-height:34px;padding-block:5px}
+html.bench .chk{min-height:34px;font-size:13.5px}
+html.bench .upper{grid-area:upper;min-height:0;gap:10px}
+html.bench .pane{min-height:0;overflow:auto;padding:9px 12px;gap:7px}
+html.bench .copytext{max-height:none;flex:1 1 auto;min-height:0;overflow:auto}
+html.bench #ownCopy{flex:1 1 auto;min-height:60px}
+html.bench .bedwrap,html.bench .paperwrap{max-height:none;flex:1 1 auto;min-height:64px}
+html.bench .stickpane{grid-area:stick;position:relative;top:auto;padding-block:0;border-bottom:0;gap:6px}
+html.bench .ab[hidden]{display:block!important;visibility:hidden}
+html.bench .ab{min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px}
+html.bench .casehead{grid-area:casehead}
+html.bench .case{grid-area:case;min-height:0;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
+html.bench .bay,html.bench .bay.r{height:auto;min-height:0;grid-column:auto}
+html.bench .box .g{font-size:clamp(17px,9cqw,34px)}
+html.bench .box.spc .g{font-size:clamp(9.5px,3.6cqw,13px)}
+html.bench details:not([open]){display:none}
+html.bench details[open]{position:fixed;top:60px;right:16px;width:min(620px,calc(100vw - 32px));max-height:calc(100% - 80px);overflow:auto;z-index:25;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+/* Landscape: copy and galley down the left, stick and case on the right, where the width goes to the case. */
+@media (orientation:landscape){
+  html.bench .wrap{grid-template-columns:minmax(270px,1fr) minmax(0,2.1fr);grid-template-rows:auto auto auto minmax(0,.75fr) minmax(0,1.25fr);
+    grid-template-areas:"top top" "copy stick" "copy casehead" "copy case" "galley case"}
+  html.bench .upper{display:contents}
+  html.bench .upper > .pane:first-child{grid-area:copy}
+  html.bench .upper > .pane:last-child{grid-area:galley}
+  html.bench .upper > .pane{contain:size}
+  html.bench .pane header .btn,html.bench .pane header .seg button{min-height:32px;padding:4px 9px;font-size:13px}
+  html.bench .pane header{gap:6px}
+}
+/* The galley or proof enlarged as a sheet over the page */
+.pane.wide{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:12px;right:12px;z-index:26;
+  contain:none!important;overflow:auto;box-shadow:0 0 0 100vmax rgba(10,12,14,.5),0 12px 40px rgba(0,0,0,.45)}
+.pane.wide .measure{max-width:calc(var(--mpt) * 4.4px)}
+.pane.wide .prooflay{grid-template-columns:minmax(0,calc(var(--mpt) * 4.4px))}
+.pane.wide .prooflay.marked{grid-template-columns:minmax(0,calc(var(--mpt) * 4.4px)) minmax(90px,1fr)}
+.prooflay.marked .line,.prooflay.marked .mline{margin-bottom:calc(var(--u) * 5px)}
+.pane.wide .bedwrap,.pane.wide .paperwrap{max-height:none;flex:1 1 auto}
+.pane.wide .paperwrap{padding:28px 26px}
+.pane.wide .mline{font-size:22px}
+.pane.wide #bigBtn{background:var(--brass);border-color:var(--brass-deep);color:#1b1405}
+/* Case fouling: a stray sort sits in the wrong box until someone picks it out */
+.box{-webkit-touch-callout:none}
+.box.fouled{box-shadow:inset 0 0 0 3px var(--bad),inset 0 2px 3px rgba(0,0,0,.28)}
+.box.foulflash{box-shadow:inset 0 0 0 5px var(--bad),inset 0 2px 3px rgba(0,0,0,.28);filter:brightness(1.12)}
+.casehead .tools{gap:6px 14px}
+#lookBtn[aria-pressed="true"]{background:var(--brass);border-color:var(--brass-deep);color:#1b1405}
+html.bench .casehead .btn,html.bench .casehead select{min-height:34px;padding-block:5px}
+.peek{position:fixed;inset:0;z-index:40;background:rgba(10,12,14,.5);display:flex;align-items:center;justify-content:center;padding:16px}
+.peek[hidden]{display:none}
+.peekcard{background:var(--panel);border:1px solid var(--rule);border-radius:4px;width:min(600px,100%);max-height:calc(100% - 32px);overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.peekcard header{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.peekcard h2{font-family:var(--display);font-weight:400;font-size:20px;margin:0;letter-spacing:.03em}
+.tiles{display:flex;flex-wrap:wrap;gap:5px;background:var(--box);padding:10px;border-radius:3px;box-shadow:inset 0 2px 5px rgba(0,0,0,.35)}
+.tile{width:36px;height:42px;border:0;padding:0;background:linear-gradient(180deg,var(--metal-hi),var(--metal));box-shadow:inset -1px 0 0 var(--metal-lo),0 1px 1px rgba(0,0,0,.25);color:var(--type-ink);font-size:25px;line-height:1;display:flex;align-items:center;justify-content:center}
+.tile.wide{width:auto;padding:0 6px;font-size:21px}
+.tile.no{animation:shake .25s}
+@media (prefers-reduced-motion:reduce){.tile.no{animation:none}}
+#peekMsg{min-height:1.4em;font-size:14px;color:var(--ink)}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>The Composing Room</h1>
+      <p>Hand composition in 12-point type, from a California job case into the stick.</p>
+    </div>
+    <div class="ctl">
+      <div class="field"><label class="lab" for="measureSel">Measure</label>
+        <select id="measureSel"><option value="16">16 picas</option><option value="20">20 picas</option><option value="24">24 picas</option></select></div>
+      <div class="field"><label class="lab" for="leadSel">Leads</label>
+        <select id="leadSel"><option value="0">Set solid</option><option value="2">2-point leads</option></select></div>
+      <label class="chk"><input type="checkbox" id="aidChk"> Right-reading aid</label>
+      <label class="chk"><input type="checkbox" id="soundChk"> Sound</label>
+      <label class="chk"><input type="checkbox" id="abChk"> Tolliver's remarks</label>
+      <div class="field" id="layoutField"><span class="lab">Layout</span>
+        <div class="seg" role="group" aria-label="Layout" id="layoutSeg"><button data-l="fit">Fit</button><button data-l="scroll">Scroll</button></div></div>
+      <button class="btn" id="fsBtn" hidden>Full screen</button>
+      <button class="btn" id="replayBtn">Watch the foreman</button>
+      <button class="btn" id="helpBtn" aria-controls="help">How it works</button>
+    </div>
+  </div>
+
+  <div class="upper">
+    <section class="pane">
+      <header><h2>Copy</h2>
+        <select id="copySel" aria-label="Choose copy">
+          <option value="whitman">Leaves of Grass, 1855</option>
+          <option value="franklin">Franklin's epitaph</option>
+          <option value="own">Your own copy</option>
+        </select></header>
+      <pre class="copytext" id="copyText"></pre>
+      <textarea id="ownCopy" placeholder="Write or paste the copy to be set." hidden></textarea>
+      <p class="note" id="copyNote"></p>
+    </section>
+
+    <section class="pane" id="galleyPane">
+      <header><h2>Galley</h2>
+        <div class="tools">
+          <div class="seg" role="group" aria-label="Galley view">
+            <button id="tabType" aria-pressed="true">The type</button><button id="tabProof" aria-pressed="false">Pull a proof</button>
+          </div>
+          <button class="btn" id="bigBtn">Enlarge</button>
+          <button class="btn" id="handBtn">Distribute by hand</button>
+          <button class="btn" id="distBtn">Distribute all</button>
+          <button class="btn" id="copyBtn">Copy text</button>
+        </div></header>
+      <div class="bedwrap" id="bedWrap"><div class="measure" id="bed"></div><p class="empty" id="bedEmpty" hidden>The galley is empty. Dumped lines stand here.</p></div>
+      <div class="paperwrap" id="paperWrap" hidden><div class="prooflay" id="proofLay"><div class="measure" id="paper"></div><div class="margin" id="margin" aria-label="Proofreader's marks" hidden></div></div><p class="empty" id="paperEmpty" hidden>There is no type on the galley to proof.</p></div>
+      <div class="tools" id="proofTools" hidden><button class="btn" id="markBtn">Read it against the copy</button></div>
+      <p class="note" id="galleyNote"></p>
+      <textarea id="exportBox" readonly hidden aria-label="Galley text to copy"></textarea>
+      <p class="legend" id="legend" hidden><b>○</b> wrong sort, the right one in the margin &nbsp; <b>‸</b> something left out &nbsp; <b>₰</b> take it out &nbsp; <b>tr</b> transpose &nbsp; <b>#</b> a space</p>
+    </section>
+  </div>
+
+  <section class="stickpane" aria-label="Composing stick">
+    <div class="coach" id="coach" hidden>
+      <div class="fist" aria-hidden="true">☞</div>
+      <div class="coachbody">
+        <div class="who">Ab Tolliver, journeyman printer</div>
+        <p class="say" id="coachSay" aria-live="polite"></p>
+        <div class="tools"><button class="btn main" id="coachNext">Next</button><button class="btn" id="coachSkip">Skip the lesson</button><span class="coachstep" id="coachStep"></span></div>
+      </div>
+    </div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <p class="ab" id="abSay" aria-live="polite" hidden></p>
+    <div class="stickrow">
+      <div class="stick" id="stick">
+        <div class="head"></div>
+        <div class="trackwrap"><div class="track" id="track"></div><div class="hint" id="hint">The stick is empty. Tap a box in the case.</div></div>
+        <div class="knee"><i></i><span id="kneeLab">20 picas</span></div>
+      </div>
+      <div class="tools">
+        <button class="btn sq" id="prevBtn" aria-label="Move along the line to the left">◀</button>
+        <button class="btn sq" id="nextBtn" aria-label="Move along the line to the right">▶</button>
+        <button class="btn" id="liftBtn">Lift out</button>
+        <button class="btn" id="quadBtn">Quad out</button>
+        <button class="btn" id="turnBtn">Turn over</button>
+        <button class="btn main" id="dumpBtn">Dump line</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="casehead">
+    <div class="field"><span class="lab">Case</span>
+      <div class="seg" role="group" aria-label="Type case" id="faceSeg">
+        <button data-f="roman">Roman</button><button data-f="italic">Italic</button><button data-f="black">Black letter</button>
+      </div></div>
+    <div class="tools">
+      <label class="chk"><input type="checkbox" id="blindChk"> Hide the lay (work from memory)</label>
+      <label class="chk"><input type="checkbox" id="foulChk"> Case fouling possible</label>
+      <select id="foulSel" aria-label="How a fouled case shows itself" hidden><option value="forgiving">Forgiving</option><option value="standard">Standard</option><option value="journeyman">Journeyman</option></select>
+      <button class="btn" id="lookBtn" type="button" aria-pressed="false" hidden>Look in a box</button>
+    </div>
+  </div>
+  <section class="case" id="case" aria-label="California job case">
+    <div class="bay l" id="bayL"></div><div class="bay m" id="bayM"></div><div class="bay r" id="bayR"></div>
+  </section>
+
+  <details id="help">
+    <summary>How the work goes</summary>
+    <p>Tap "Watch the foreman" at the top of the page to see the whole job done for you, with every tap shown.</p>
+    <ol>
+      <li>Read the copy, then tap a box in the case to take a sort. It drops into the stick at the end of the line, or just after the sort you have marked.</li>
+      <li>The stick shows the type as a compositor sees it: left to right, upside down. Turn on the right-reading aid if you want it the easy way round.</li>
+      <li>Put a 3-em space between words. The spaces are the dark, low blocks.</li>
+      <li>Near the end of the measure, justify the line. Step along it with the arrows, lift a space, and put in a wider or thinner one until the line is tight. Brass and copper thins take up the last point. For a short last line, quad out.</li>
+      <li>When a verse line is longer than the measure, set words until the next one will not go in, then tap Turn over. It spreads spaces between the words to justify the line, dumps it, and starts the runover in the stick with an em-quad indent. Finish the runover and quad it out like any short line.</li>
+      <li>Dump the tight line onto the galley and pull a proof. Tap "Read it against the copy" to have the proof marked the way a proofreader would. To correct a line, tap it on the galley to take it back into an empty stick. When you dump it again, it goes back in its place.</li>
+      <li>Distribute when you are done, because a case can run out of sorts. "Distribute by hand" brings the type back into the stick a line at a time: tap the box where each marked sort lives. Spaces go back by themselves. After two misses on one sort, its box glows. "Distribute all" throws everything back at once.</li>
+      <li>"Copy text" copies the galley as plain text, one line of type to a line, ready to paste into Sigla as a witness.</li>
+      <li>With "Case fouling possible" checked, a miss in distribution by hand is not a second try: the sort drops into the box you tapped and stays there. Later it may come out when you set from that box, looking almost right. Catch it by reading the stick (lifting it out earns a word from Tolliver) or on the proof. To clean a box, press and hold it, or tap "Look in a box," and pick out the sort that does not belong. <i>Forgiving</i> outlines a fouled box in red until it is clean and tells you when a stray comes out. <i>Standard</i> flashes the box once when the sort goes astray. <i>Journeyman</i> says nothing at all. Spaces go back by themselves and never foul. Unchecking the box cleans the case.</li>
+    </ol>
+    <p>The lay follows the California job case: lower case in the two left bays, capitals on the right with J and U after Z. There is a box for the opening quotation mark; set the closing one as two apostrophes, as compositors often did. The two thin-space boxes in the capitals' top row are an addition for convenience. A keyboard also works: letters set sorts, the space bar sets a 3-em space, Backspace lifts out, Enter dumps the line.</p>
+  </details>
+</div>
+
+<div class="peek" id="peek" hidden>
+  <div class="peekcard" role="dialog" aria-modal="true" aria-labelledby="peekTitle">
+    <header><h2 id="peekTitle"></h2><button class="btn main" id="peekClose" type="button">Done</button></header>
+    <p class="note" id="peekNote"></p>
+    <div class="tiles" id="peekTiles"></div>
+    <p id="peekMsg" aria-live="polite"></p>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var KEY='composing-room-v2';
+var SP={'5em':{w:2.4,l:'5-em',n:'5-em space',c:60},'4em':{w:3,l:'4-em',n:'4-em space',c:60},'3em':{w:4,l:'3-em space',n:'3-em space',c:140},
+ en:{w:6,l:'en quad',n:'en quad',c:60},em:{w:12,l:'em quad',n:'em quad',c:50},'2q':{w:24,l:'2-em',n:'2-em quad',c:14},'3q':{w:36,l:'3-em',n:'3-em quad',c:14},
+ brass:{w:1,l:'brass 1 pt',n:'brass thin',c:60},copper:{w:.5,l:'copper ½',n:'copper thin',c:60}};
+var FACES={roman:{css:'f-roman',cv:'200px "IM Fell English", Georgia, serif',ld:'16px "IM Fell English"',name:'roman'},
+ italic:{css:'f-italic',cv:'italic 200px "IM Fell English", Georgia, serif',ld:'italic 16px "IM Fell English"',name:'italic'},
+ black:{css:'f-black',cv:'200px "UnifrakturMaguntia", Georgia, serif',ld:'16px "UnifrakturMaguntia"',name:'black letter'}};
+var BILL={a:40,b:12,c:18,d:22,e:60,f:14,g:12,h:30,i:40,j:4,k:6,l:22,m:16,n:40,o:40,p:12,q:4,r:36,s:36,t:46,u:18,v:8,w:14,x:4,y:14,z:3,
+ ',':16,'.':14,';':5,':':5,'-':8,"'":12,'“':5,'!':4,'?':4,'&':4,'$':3,'—':4,'(':3,')':3,'*':3,ff:5,fi:6,fl:5,ffi:4,ffl:3,A:8,E:8,I:8,O:8,T:8,S:8};
+function bill(k){ if(BILL[k]) return BILL[k]; if(/[0-9]/.test(k)) return 8; return 6; }
+
+var LEFT=[['ffi',1,5,1,3],['fl',5,9,1,3],['sp:5em',9,12,1,3],['sp:4em',12,15,1,3],["'",15,18,1,3],['k',18,21,1,3],['e',21,27,1,7],
+ ['j',1,5,3,5],['?',1,5,5,7],['b',5,9,3,7],['c',9,15,3,7],['d',15,21,3,7],
+ ['!',1,5,7,9],['z',1,5,9,11],['l',5,9,7,11],['m',9,15,7,11],['n',15,21,7,11],['h',21,27,7,11],
+ ['x',1,5,11,13],['q',1,5,13,15],['v',5,9,11,15],['u',9,15,11,15],['t',15,21,11,15],['sp:3em',21,27,11,15]];
+var MID=[['i',1,7,3,7],['s',7,13,3,7],['f',13,16,3,7],['g',16,19,3,7],['ff',19,22,3,5],['fi',19,22,5,7],['9',22,25,3,5],['0',22,25,5,7],
+ ['o',1,7,7,11],['y',7,10,7,9],['p',10,13,7,9],['w',7,13,9,11],[',',13,16,7,11],['sp:en',16,19,7,11],['sp:em',19,25,7,11],
+ ['a',1,7,11,15],['r',7,13,11,15],[';',13,16,11,13],[':',13,16,13,15],['.',16,19,11,13],['-',16,19,13,15],['sp:2q',19,22,11,15],['sp:3q',22,25,11,15]];
+for(var d=1;d<=8;d++) MID.unshift([String(d),(d-1)*3+1,(d-1)*3+4,1,3]);
+var RIGHT=['$','—','(',')','“','sp:brass','sp:copper'].concat('ABCDEFGHIKLMNOPQRSTVWXYZJU&'.split(''),['ffl']);
+var ALL={}; LEFT.concat(MID).forEach(function(c){ALL[c[0]]=1}); RIGHT.forEach(function(k){ALL[k]=1});
+
+var COPY={whitman:{t:"I celebrate myself,\nAnd what I assume you shall assume,\nFor every atom belonging to me as good belongs to you.\n\nI loafe and invite my soul,\nI lean and loafe at my ease . . . . observing a spear of summer grass.",
+   n:"The opening of the first edition. Whitman learned the trade as a boy and is said to have set some of these pages himself. The long third line will need turning over."},
+ franklin:{t:"The Body of\nB. Franklin, Printer;\nLike the Cover of an old Book,\nIts Contents torn out,\nAnd stript of its Lettering and Gilding,\nLies here, Food for Worms.",
+   n:"The epitaph Franklin wrote for himself as a young printer. Good practice for capitals and for quadding out short lines."},
+ own:{t:"",n:"Apostrophes are set with the apostrophe sort. The opening quotation mark has its own box; set the closing one as two apostrophes."}};
+
+var S={face:'roman',measure:20,lead:2,aid:false,sound:true,blind:false,copy:'whitman',own:'',stick:[],sel:-1,galley:[],counts:null,tab:'type',example:false,from:null,marks:false,dist:null,ab:true,layout:'fit',foul:false,foulMode:'standard',strays:{}};
+var newIdx=-1, armed=false, armT=0, msg=null, msgT=0, looking=false;
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function freshCounts(){ var c={sp:{}}; Object.keys(SP).forEach(function(k){c.sp[k]=SP[k].c});
+ Object.keys(FACES).forEach(function(f){c[f]={}; Object.keys(ALL).forEach(function(k){ if(k.indexOf('sp:')!==0) c[f][k]=bill(k); });}); return c; }
+function isSp(k){return k.indexOf('sp:')===0}
+function pool(s){ return isSp(s.k)?[S.counts.sp,s.k.slice(3)]:[S.counts[s.f],s.k]; }
+function give(s,n){ var p=pool(s); p[0][p[1]]=(p[0][p[1]]||0)+n; }
+function have(k,f){ return isSp(k)?S.counts.sp[k.slice(3)]:S.counts[f][k]; }
+/* Fouled boxes: S.strays[face][box] lists the letters sitting in a box that is not theirs. They are out of the counts until picked out or set. */
+function strays(f,k){ var m=S.strays&&S.strays[f]; return (m&&m[k])||[]; }
+function strayAdd(f,k,letter){ S.strays[f]=S.strays[f]||{}; (S.strays[f][k]=S.strays[f][k]||[]).push(letter); }
+function cleanAll(){ var n=0; Object.keys(S.strays||{}).forEach(function(f){ var m=S.strays[f]||{}; Object.keys(m).forEach(function(k){ (m[k]||[]).forEach(function(l){ if(S.counts[f]){ S.counts[f][l]=(S.counts[f][l]||0)+1; n++; } }); }); }); S.strays={}; return n; }
+function tidyStrays(){ if(['forgiving','standard','journeyman'].indexOf(S.foulMode)<0) S.foulMode='standard'; S.foul=!!S.foul;
+ var src=(S.strays&&typeof S.strays==='object')?S.strays:{}, out={};
+ Object.keys(src).forEach(function(f){ if(!FACES[f]||!src[f]||typeof src[f]!=='object') return;
+  Object.keys(src[f]).forEach(function(k){ if(!ALL[k]||isSp(k)||!Array.isArray(src[f][k])) return;
+   var a=src[f][k].filter(function(l){ return typeof l==='string'&&ALL[l]&&!isSp(l); }); if(a.length){ out[f]=out[f]||{}; out[f][k]=a; } }); });
+ S.strays=out; }
+
+var cv=document.createElement('canvas').getContext('2d'), WC={};
+function width(k,f){ if(isSp(k)) return SP[k.slice(3)].w; var id=f+'|'+k; if(WC[id]) return WC[id];
+ cv.font=FACES[f].cv; var w=cv.measureText(k).width/200*12; w=Math.max(1.5,Math.round(w*100)/100); return WC[id]=w; }
+function mpt(){return S.measure*12}
+function used(a){var t=0; for(var i=0;i<a.length;i++) t+=a[i].w; return t}
+function free(){return mpt()-used(S.stick)}
+function fmt(pt){ pt=Math.max(0,Math.round(pt*10)/10); var p=Math.floor(pt/12+1e-6), r=Math.round((pt-p*12)*10)/10; var out=[];
+ if(p) out.push(p+(p===1?' pica':' picas')); if(r||!p) out.push(r+' pt'); return out.join(' '); }
+function nameOf(s){ return isSp(s.k)?SP[s.k.slice(3)].n:(s.k+' ('+FACES[s.f].name+')'); }
+
+function save(){ if(demo) return; try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} }
+function okSort(s){ return !!(s&&typeof s.k==='string'&&typeof s.w==='number'&&(isSp(s.k)?SP[s.k.slice(3)]:(FACES[s.f]&&ALL[s.k]))); }
+function load(){ try{var j=JSON.parse(localStorage.getItem(KEY)||'null');
+ if(j&&j.counts&&Array.isArray(j.stick)&&Array.isArray(j.galley)&&j.stick.every(okSort)&&j.galley.every(function(a){return Array.isArray(a)&&a.every(okSort)})){
+  var fc=freshCounts(); Object.keys(fc).forEach(function(g){ j.counts[g]=j.counts[g]||{}; Object.keys(fc[g]).forEach(function(k){ if(typeof j.counts[g][k]!=='number') j.counts[g][k]=fc[g][k]; }); });
+  for(var k in j) if(k in S) S[k]=j[k]; if(S.from!=null&&!S.stick.length) S.from=null; tidyStrays(); return true; }}catch(e){} return false; }
+/* After the web fonts arrive, measure every sort again so the boxes match the letters. Quadded lines on the galley are quadded out afresh. */
+function remeasure(){ WC={}; function rw(s){ s.w=width(s.k,s.f); }
+ S.stick.forEach(rw);
+ S.galley.forEach(function(a){ a.forEach(rw); if(Math.abs(mpt()-used(a))>0.3){ var j=a.length; while(j>0&&isSp(a[j-1].k)) j--;
+  if(j>0&&j<a.length){ a.splice(j).forEach(function(s){give(s,1)}); quadOut(a,true); } } }); }
+
+/* Proofreading: compare what is on the galley with the copy, character by character. */
+function norm(t){ t=(t||'').replace(/[‘’]/g,"'").replace(/”/g,"''").replace(/(^|[\s(\[])"/g,'$1“').replace(/"/g,"''");
+ return t.replace(/\s+/g,' ').trim(); }
+function setStream(){ var A=[], prevSoft=false;
+ S.galley.forEach(function(a,L){ var first=-1,last=-1; a.forEach(function(s,i){ if(!isSp(s.k)){ if(first<0) first=i; last=i; } }); if(first<0) return;
+  if(A.length&&!prevSoft) A.push({ch:' ',syn:true});
+  var end=last; prevSoft=(a[last].k==='-'&&L<S.galley.length-1); if(prevSoft) end=last-1;
+  var inSp=false; for(var i=first;i<=end;i++){ var s=a[i];
+   if(isSp(s.k)){ if(!inSp){ A.push({ch:' ',line:L,idx:i}); inSp=true; } }
+   else { inSp=false; for(var c=0;c<s.k.length;c++) A.push({ch:s.k[c],line:L,idx:i}); } } });
+ return A; }
+function proofMarks(){ var A=setStream(), n=A.length; if(!n) return [];
+ var B=norm(S.copy==='own'?S.own:COPY[S.copy].t), m=Math.min(B.length,n+40), W=m+1, T=new Uint16Array((n+1)*W), i, j;
+ for(i=n-1;i>=0;i--) for(j=m-1;j>=0;j--) T[i*W+j]=A[i].ch===B[j]?T[(i+1)*W+j+1]+1:Math.max(T[(i+1)*W+j],T[i*W+j+1]);
+ var ops=[]; i=0; j=0;
+ while(i<n||j<m){ if(i<n&&j<m&&A[i].ch===B[j]&&T[i*W+j]===T[(i+1)*W+j+1]+1){ ops.push({t:'=',i:i,j:j}); i++; j++; }
+  else if(i<n&&(j>=m||T[(i+1)*W+j]>=T[i*W+j+1])){ ops.push({t:'-',i:i}); i++; }
+  else { ops.push({t:'+',i:i,j:j}); j++; } }
+ var lastReal=-1; ops.forEach(function(o,k){ if(o.t!=='+') lastReal=k; });
+ var tail=ops.slice(lastReal+1); ops=ops.slice(0,lastReal+1);
+ var k=ops.length; while(k>0&&ops[k-1].t==='-') k--; var dels=ops.length-k; ops=ops.concat(tail.slice(0,dels));
+ var raw=[], run=[];
+ function flush(){ if(!run.length) return; var d=run.filter(function(o){return o.t==='-'}), ad=run.filter(function(o){return o.t==='+'}), p=Math.min(d.length,ad.length);
+  for(var q=0;q<p;q++) raw.push({kind:'sub',a:A[d[q].i],text:B[ad[q].j]});
+  d.slice(p).forEach(function(o){ raw.push({kind:'del',a:A[o.i]}); });
+  ad.slice(p).forEach(function(o){ var x=A[o.i], pos='b'; if(!x||x.syn){ x=A[o.i-1]; pos='a'; } if(x&&!x.syn) raw.push({kind:'add',a:x,pos:pos,text:B[o.j],at:o.i}); });
+  run=[]; }
+ ops.forEach(function(o){ if(o.t==='=') flush(); else run.push(o); }); flush();
+ var out=[]; raw.forEach(function(r){ if(!r.a||r.a.syn) return; var p=out[out.length-1];
+  if(p&&p.kind===r.kind&&p.line===r.a.line&&(r.kind==='add'?(p.at===r.at):(r.a.idx-p.last<=1))){ if(r.text) p.text+=r.text; p.last=r.a.idx; if(r.kind!=='add'&&p.idxs.indexOf(r.a.idx)<0) p.idxs.push(r.a.idx); return; }
+  out.push({kind:r.kind,line:r.a.line,idx:r.a.idx,last:r.a.idx,idxs:[r.a.idx],pos:r.pos,text:r.text||'',at:r.at}); });
+ /* a letter taken out here and wanted one place over is a transposition */
+ for(var q=0;q<out.length;q++){ var x=out[q]; if(x.kind!=='del'||x.idxs.length!==1) continue;
+  for(var r=Math.max(0,q-1);r<=Math.min(out.length-1,q+1);r++){ var y=out[r];
+   if(r!==q&&y.kind==='add'&&y.line===x.line&&Math.abs(y.idx-x.idx)<=2&&S.galley[x.line][x.idx].k===y.text){
+    out.splice(Math.max(q,r),1); out.splice(Math.min(q,r),1,{kind:'tr',line:x.line,idx:x.idx,idxs:[x.idx,y.idx],text:''}); break; } } }
+ return out; }
+function marginText(mk){ var t=mk.text.replace(/ /g,'#');
+ if(mk.kind==='tr') return 'tr/'; if(mk.kind==='del') return '₰/';
+ if(mk.kind==='add') return mk.text.trim().length>8?'‸out, see copy/':'‸'+t+'/'; return t+'/'; }
+function unevenSpaces(a){ var runs=[],cur=0,seen=false,inRun=false;
+ a.forEach(function(s){ if(isSp(s.k)){ if(seen){ cur+=s.w; inRun=true; } } else { if(inRun) runs.push(cur); cur=0; inRun=false; seen=true; } });
+ return runs.length>1&&Math.max.apply(null,runs)-Math.min.apply(null,runs)>=4; }
+
+/* sound */
+var ac=null;
+function tick(low){ if(!S.sound) return; try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume();
+ var n=Math.floor(ac.sampleRate*(low?0.09:0.03)), b=ac.createBuffer(1,n,ac.sampleRate), d=b.getChannelData(0);
+ for(var i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+ var src=ac.createBufferSource(); src.buffer=b; var f=ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=low?500:2600; f.Q.value=1.2;
+ var g=ac.createGain(); g.gain.value=low?0.5:0.3; src.connect(f); f.connect(g); g.connect(ac.destination); src.start(); }catch(e){} }
+
+/* building elements */
+function el(tag,cls,txt){var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e}
+function sortEl(s,i){ var e=el('div','sort'+(isSp(s.k)?' sp':'')); e.style.width='calc(var(--u) * '+s.w+'px)'; e.dataset.i=i;
+ if(!isSp(s.k)){ e.appendChild(el('span','g '+FACES[s.f].css,s.k)); } return e; }
+function lineEl(a,i){ var l=el('div','line'); l.dataset.l=i; a.forEach(function(s,j){l.appendChild(sortEl(s,j))}); return l; }
+
+function buildCase(){
+ function box(k){ var b=el('button','box'+(isSp(k)?' spc':'')); b.dataset.k=k; b.type='button';
+  b.appendChild(el('span','g',isSp(k)?SP[k.slice(3)].l:k)); b.appendChild(el('span','n',''));
+  b.setAttribute('aria-label',isSp(k)?SP[k.slice(3)].n:k); return b; }
+ [[LEFT,$('bayL')],[MID,$('bayM')]].forEach(function(p){ p[0].forEach(function(c){ var b=box(c[0]); b.style.gridArea=c[3]+' / '+c[1]+' / '+c[4]+' / '+c[2]; p[1].appendChild(b); }); });
+ RIGHT.forEach(function(k){ $('bayR').appendChild(box(k)); });
+ /* press and hold a box to look in it (only when fouling is on) */
+ var lpT=0, lpFired=false, lpX=0, lpY=0;
+ function lpCancel(){ clearTimeout(lpT); lpT=0; }
+ $('case').addEventListener('pointerdown',function(ev){ var b=ev.target.closest('.box'); lpCancel(); lpFired=false;
+  if(!b||!S.foul||S.dist||demo) return; lpX=ev.clientX; lpY=ev.clientY;
+  lpT=setTimeout(function(){ lpT=0; lpFired=true; setLooking(false); openPeek(b.dataset.k); },550); });
+ $('case').addEventListener('pointermove',function(ev){ if(lpT&&(Math.abs(ev.clientX-lpX)>10||Math.abs(ev.clientY-lpY)>10)) lpCancel(); });
+ ['pointerup','pointercancel','pointerleave'].forEach(function(t){ $('case').addEventListener(t,lpCancel); });
+ $('case').addEventListener('contextmenu',function(ev){ if(S.foul&&ev.target.closest('.box')) ev.preventDefault(); });
+ $('case').addEventListener('click',function(ev){ var b=ev.target.closest('.box'); if(lpFired){ lpFired=false; return; } if(b) pick(b.dataset.k,b); });
+}
+function renderCase(){
+ var css=FACES[S.face].css;
+ $('case').classList.toggle('blind',S.blind);
+ var outline=S.foul&&S.foulMode==='forgiving';
+ $('case').querySelectorAll('.box').forEach(function(b){ var k=b.dataset.k, st=isSp(k)?0:strays(S.face,k).length, n=(have(k,S.face)||0)+st;
+  if(!isSp(k)) b.firstChild.className='g '+css; b.lastChild.textContent=n; b.classList.toggle('out',n<=0); b.classList.toggle('fouled',outline&&st>0); });
+ $('faceSeg').querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed',b.dataset.f===S.face?'true':'false'); });
+}
+function renderStick(){
+ var t=$('track'); t.textContent=''; t.classList.toggle('flip',!S.aid);
+ S.stick.forEach(function(s,i){ var e=sortEl(s,i); if(i===S.sel) e.classList.add('sel'); if(i===newIdx) e.classList.add('new'); t.appendChild(e); });
+ $('hint').hidden=S.stick.length>0; $('kneeLab').textContent=S.measure+' picas';
+ var f=free(), st=$('status'); st.textContent='';
+ if(msg){ st.appendChild(el('b','st-'+msg.c,msg.t)); }
+ else if(looking){ st.appendChild(el('b',null,'Tap a box in the case to look in it.')); }
+ else if(S.dist){ var left=distLeft(); st.appendChild(el('b',null,'Distributing by hand: '+left+(left===1?' sort':' sorts')+' to go.')); st.appendChild(el('span',null,'Tap the box where the marked sort lives.'));
+  if(S.dist.miss) st.appendChild(el('span','st-warn',S.dist.miss+(S.dist.miss===1?' miss':' misses'))); }
+ else if(!S.stick.length){ st.appendChild(el('span',null,'Measure '+S.measure+' picas. Nothing in the stick.')); }
+ else if(f<-0.25){ st.appendChild(el('b','st-bad','The line is overfull by '+fmt(-f)+'. Lift something out.')); }
+ else if(f<0.6){ st.appendChild(el('b','st-ok','The line is tight. Dump it onto the galley.')); if(unevenSpaces(S.stick)) st.appendChild(el('span',null,'The word spaces are uneven, which the proof will show. It will still print.')); }
+ else { st.appendChild(el('span',null,'Set '+fmt(used(S.stick))+'.')); st.appendChild(el('b','st-warn',fmt(f)+' to fill.')); }
+ if(!msg&&!S.dist&&S.sel>=0&&S.stick[S.sel]) st.appendChild(el('span',null,'Marked: '+nameOf(S.stick[S.sel])+'. New sorts go in after it.'));
+ var anything=S.stick.length||S.galley.length; $('measureSel').disabled=!!anything;
+ $('liftBtn').disabled=!S.stick.length; $('quadBtn').disabled=!S.stick.length||f<0.6; $('turnBtn').disabled=!S.stick.some(function(s){return !isSp(s.k)}); $('dumpBtn').disabled=!S.stick.length;
+ $('prevBtn').disabled=$('nextBtn').disabled=!S.stick.length;
+ if(S.dist) ['liftBtn','quadBtn','turnBtn','dumpBtn','prevBtn','nextBtn'].forEach(function(b){ $(b).disabled=true; });
+}
+function fillGalley(host,flip){ host.textContent=''; host.classList.toggle('flip',flip);
+ S.galley.forEach(function(a,i){ if(i&&S.lead>0) host.appendChild(el('div','lead')).style.height='calc(var(--u) * '+S.lead+'px)'; host.appendChild(lineEl(a,i)); }); }
+function renderGalley(){
+ var proof=S.tab==='proof'; $('bedWrap').hidden=proof; $('paperWrap').hidden=!proof;
+ $('tabType').setAttribute('aria-pressed',proof?'false':'true'); $('tabProof').setAttribute('aria-pressed',proof?'true':'false');
+ fillGalley($('bed'),!S.aid); fillGalley($('paper'),false);
+ $('bedEmpty').hidden=S.galley.length>0; $('paperEmpty').hidden=S.galley.length>0;
+ var n=S.galley.length, marking=proof&&S.marks&&n>0, note='';
+ $('proofTools').hidden=!proof||!n; $('markBtn').textContent=S.marks?'Hide the marks':'Read it against the copy';
+ $('margin').hidden=!marking; $('proofLay').classList.toggle('marked',marking); $('legend').hidden=!marking;
+ var mg=$('margin'); mg.textContent='';
+ if(marking){ var mk=proofMarks(), per=S.galley.map(function(){return []});
+  mk.forEach(function(x){ per[x.line].push(x); var le=$('paper').querySelector('.line[data-l="'+x.line+'"]'); if(!le) return;
+   if(x.kind==='add'){ var se=le.querySelector('.sort[data-i="'+x.idx+'"]'); if(se) se.appendChild(el('span','caret '+x.pos,'‸')); }
+   else x.idxs.forEach(function(ix){ var se=le.querySelector('.sort[data-i="'+ix+'"]'); if(se) se.classList.add('err'); }); });
+  S.galley.forEach(function(a,i){ if(i&&S.lead>0){ var ld=el('div','mlead'); ld.style.height='calc(var(--u) * '+S.lead+'px)'; mg.appendChild(ld); }
+   var ml=el('div','mline'); per[i].forEach(function(x){ ml.appendChild(el('span',null,marginText(x))); }); mg.appendChild(ml); });
+  note=mk.length?(mk.length+(mk.length===1?' mark':' marks')+' against the copy. Go back to the type and tap a marked line to take it into the stick and correct it.')
+   :'A clean proof, without a mark on it.'; }
+ $('galleyNote').textContent=note||(S.example?'Example: the first line of the copy is already on the galley and the second is begun in the stick. Distribute to start with a full case.'
+  :(proof?'A proof of '+n+(n===1?' line.':' lines.'):(n?'Tap a line of type to take it back into an empty stick.':'')));
+ var any=!!(S.stick.length||S.galley.length);
+ $('distBtn').textContent=S.dist?(armed?'Tap again to throw the rest in':'Throw the rest in'):(armed?'Tap again to distribute all':'Distribute all'); $('distBtn').disabled=!any;
+ $('handBtn').disabled=!any||!!S.dist; $('copyBtn').disabled=!S.galley.length;
+}
+function renderCopy(){ var own=S.copy==='own'; $('copySel').value=S.copy; $('copyText').hidden=own; $('ownCopy').hidden=!own;
+ if(!own) $('copyText').textContent=COPY[S.copy].t; else if($('ownCopy').value!==S.own) $('ownCopy').value=S.own;
+ $('copyNote').textContent=COPY[S.copy].n; }
+function fit(){ document.documentElement.style.setProperty('--mpt',mpt());
+ [$('track'),$('bed'),$('paper')].forEach(function(e){ var w=e.clientWidth; if(w>0) e.style.setProperty('--u',(w/mpt()).toFixed(4)); });
+ var pu=$('paper').style.getPropertyValue('--u'); if(pu) $('margin').style.setProperty('--u',pu); }
+function render(){ renderCase(); renderStick(); renderGalley(); fit(); newIdx=-1; save(); }
+function say(t,c){ msg={t:t,c:c||'bad'}; clearTimeout(msgT); msgT=setTimeout(function(){msg=null; renderStick();},3200); }
+function shake(){ if(reduce) return; var s=$('stick'); s.classList.remove('shake'); void s.offsetWidth; s.classList.add('shake'); }
+
+function fly(from,k,f){ if(reduce||!from||!from.getBoundingClientRect) return; var to=$('track').querySelector('.sort.new'); if(!to||!document.body.animate) return;
+ var a=from.getBoundingClientRect(), b=to.getBoundingClientRect(), x=a.left+a.width/2-12, y=a.top+a.height/2-12;
+ var d=el('div','fly '+FACES[f].css,isSp(k)?'':k); d.style.left=x+'px'; d.style.top=y+'px'; document.body.appendChild(d);
+ var an=d.animate([{transform:'translate(0,0)'},{transform:'translate('+(b.left-x)+'px,'+(b.top-y)+'px)'}],{duration:170,easing:'ease-in'});
+ an.onfinish=an.oncancel=function(){d.remove()}; }
+
+function pick(k,from){
+ if(!ALL[k]) return; if(S.dist) return distTap(k,from); if(looking){ setLooking(false); openPeek(k); return; }
+ var f=S.face, st=(S.foul&&!isSp(k))?strays(f,k):[], n=(have(k,f)||0)+st.length;
+ if(n<=0){ say('Out of sorts: this box is empty. Distribute some type, or take the letter from another case.'); heckle('out',true); renderStick(); return; }
+ /* from a fouled box, the hand may come up with the stray, in proportion to how many good sorts are in there */
+ var si=(st.length&&Math.random()*n<st.length)?Math.floor(Math.random()*st.length):-1, kk=si>=0?st[si]:k;
+ var w=width(kk,f), fr=free();
+ if(w>fr+0.2){ say((fr<0.6?'The line is full.':('It will not go in: '+fmt(fr)+' is left and this sort is '+fmt(w)+' wide.'))+' If the verse line runs on, lift out any part-word and tap Turn over.','warn'); heckle('full'); shake(); renderStick(); return; }
+ var s={k:kk,f:f,w:w}; if(si>=0){ st.splice(si,1); s.x=1; } else give(s,-1); msg=null;
+ if(si>=0&&S.foulMode==='forgiving') say('Foul case: a stray “'+kk+'” came out of the '+k+' box. Lift it out.','warn');
+ if(S.sel>=0&&S.sel<S.stick.length){ S.stick.splice(S.sel+1,0,s); S.sel++; newIdx=S.sel; } else { S.sel=-1; S.stick.push(s); newIdx=S.stick.length-1; }
+ tick(false); renderCase(); renderStick(); fit(); fly(from,kk,f); newIdx=-1; save();
+}
+function lift(){ if(!S.stick.length) return; var i=(S.sel>=0&&S.sel<S.stick.length)?S.sel:S.stick.length-1; var s=S.stick.splice(i,1)[0]; give(s,1);
+ if(S.sel>=0) S.sel=i-1; msg=null; tick(false);
+ if(S.foul&&s.x){ say('Good eye. That '+s.k+' was a foul sort; it goes back to its own box.','ok'); heckle('goodeye',true); }
+ render(); }
+function step(d){ var n=S.stick.length; if(!n) return; if(S.sel<0) S.sel=d<0?n-1:0; else { S.sel+=d; if(S.sel>=n||S.sel<0) S.sel=-1; } renderStick(); }
+function quadOut(arr,silent){ var a=arr||S.stick, order=['3q','2q','em','en','3em','4em','5em','brass','copper'], f=mpt()-used(a), guard=0;
+ while(f>=0.6&&guard++<400){ var done=false; for(var i=0;i<order.length;i++){ var k=order[i]; if(SP[k].w<=f+0.001&&S.counts.sp[k]>0){ a.push({k:'sp:'+k,f:'roman',w:SP[k].w}); S.counts.sp[k]--; f-=SP[k].w; done=true; break; } } if(!done) break; }
+ if(!silent){ S.sel=-1; msg=null; tick(true); heckle('quad'); render(); } }
+/* Turn over: justify the full part of a long verse line by spreading spaces between its words, dump it, and start the runover indented by an em quad. */
+function turnOver(){ var a=S.stick; if(!a.length) return;
+ while(a.length&&isSp(a[a.length-1].k)) give(a.pop(),1);
+ if(!a.length){ render(); return; }
+ var gaps=[]; for(var i=1;i<a.length;i++){ if(isSp(a[i].k)&&!isSp(a[i-1].k)) gaps.push(i); }
+ var f=mpt()-used(a);
+ if(f<-0.25){ say('The line is overfull. Lift something out first.','warn'); shake(); renderStick(); return; }
+ if(!gaps.length) quadOut(a,true);
+ else { var sizes=['3em','4em','5em','brass','copper'], g=0, guard=0;
+  sizes.forEach(function(k){ while(f>=SP[k].w-0.001&&f>=0.6&&S.counts.sp[k]>0&&guard++<300){
+   var at=gaps[g%gaps.length]; a.splice(at,0,{k:'sp:'+k,f:'roman',w:SP[k].w}); S.counts.sp[k]--; f-=SP[k].w;
+   for(var q2=0;q2<gaps.length;q2++) if(gaps[q2]>=at) gaps[q2]++; g++; } }); }
+ if(mpt()-used(a)>=0.6){ say('There are not enough spaces left in the case to justify this line. Distribute some type.','warn'); renderStick(); return; }
+ var back=S.from!=null; if(back) S.galley.splice(Math.min(S.from,S.galley.length),0,a); else S.galley.push(a);
+ S.stick=[]; S.sel=-1;
+ if(back){ S.from=null; } else if(S.counts.sp.em>0){ S.stick.push({k:'sp:em',f:'roman',w:12}); S.counts.sp.em--; }
+ S.tab='type'; msg={t:'Turned over. The runover line starts indented by an em quad, the usual way with long verse lines.',c:'ok'}; clearTimeout(msgT); msgT=setTimeout(function(){msg=null; renderStick();},4000);
+ tick(true); heckle('turn'); render(); }
+function dump(){ if(!S.stick.length) return; var f=free();
+ if(f>=0.6){ say('The line is loose by '+fmt(f)+' and would pie on the way to the galley. Justify it, or quad out.','warn'); heckle('loose',true); shake(); renderStick(); return; }
+ if(f<-0.25){ say('The line is overfull. Lift something out first.','warn'); shake(); renderStick(); return; }
+ var back=S.from!=null; if(back) S.galley.splice(Math.min(S.from,S.galley.length),0,S.stick); else S.galley.push(S.stick);
+ S.stick=[]; S.sel=-1; S.from=null; if(!back) S.tab='type'; msg=null; tick(true); heckle('dump'); render();
+ var w=$('bedWrap'); w.scrollTop=S.aid?w.scrollHeight:0; }
+function takeBack(i){ if(S.dist) return; if(S.stick.length){ say('Empty the stick before taking a line back from the galley.','warn'); renderStick(); return; }
+ setWide(false); S.stick=S.galley.splice(i,1)[0]; S.from=i; S.sel=-1; tick(true); heckle('takeback'); render(); }
+function distribute(){ if(!armed){ armed=true; renderGalley(); clearTimeout(armT); armT=setTimeout(function(){armed=false; renderGalley();},3000); return; }
+ armed=false; clearTimeout(armT); S.galley.forEach(function(a){a.forEach(function(s){give(s,1)})}); S.stick.forEach(function(s){give(s,1)});
+ var wasHand=!!S.dist; S.dist=null; clearHint();
+ S.galley=[]; S.stick=[]; S.sel=-1; S.from=null; S.example=false; S.tab='type'; msg={t:wasHand?'Thrown back. The rest of the type is in its boxes.':'Distributed. Every sort is back in its box.',c:'ok'}; clearTimeout(msgT); msgT=setTimeout(function(){msg=null; renderStick();},3200); tick(true); render(); }
+
+/* ---------- Distribution by hand: the type comes back into the stick a line at a time; tap the box each sort lives in ---------- */
+function distLeft(){ var n=0; function c(a){ a.forEach(function(s){ if(!isSp(s.k)) n++; }); } c(S.stick); S.galley.forEach(c); return n; }
+function clearHint(){ $('case').querySelectorAll('.hintbox').forEach(function(b){ b.classList.remove('hintbox'); }); }
+var wide=false;
+function setWide(on){ wide=!!on; $('galleyPane').classList.toggle('wide',wide); $('bigBtn').textContent=wide?'Close':'Enlarge'; fit(); }
+function startHand(){ setWide(false); if(demo||S.dist||!(S.stick.length||S.galley.length)) return;
+ S.dist={miss:0,done:0,run:0,best:0,wrong:0,t0:Date.now()}; S.from=null; S.tab='type'; armed=false; msg=null;
+ distAdvance(); if(S.dist) heckle('distStart',true); render(); }
+function distAdvance(){
+ for(;;){ while(S.stick.length&&isSp(S.stick[0].k)) give(S.stick.shift(),1);
+  if(S.stick.length) break; if(!S.galley.length){ distFinish(); return; } S.stick=S.galley.shift(); }
+ S.sel=0; var s=S.stick[0]; if(s.f!==S.face){ S.face=s.f; say('That one is '+FACES[s.f].name+', so the '+FACES[s.f].name+' case is open.','ok'); } }
+function flyTo(fromEl,toEl,k,f){ if(reduce||!fromEl||!toEl||!document.body.animate) return;
+ var a=fromEl.getBoundingClientRect(), b=toEl.getBoundingClientRect(), x=a.left+a.width/2-12, y=a.top+a.height/2-12;
+ var d=el('div','fly '+FACES[f].css,k); d.style.left=x+'px'; d.style.top=y+'px'; document.body.appendChild(d);
+ var an=d.animate([{transform:'translate(0,0)'},{transform:'translate('+(b.left+b.width/2-12-x)+'px,'+(b.top+b.height/2-12-y)+'px)'}],{duration:170,easing:'ease-in'});
+ an.onfinish=an.oncancel=function(){d.remove()}; }
+function distTap(k,b){ var s=S.stick[0], D=S.dist; if(!s) return;
+ if(k===s.k){ flyTo($('track').querySelector('.sort[data-i="0"]'),b||box(k),k,s.f); give(s,1); S.stick.shift();
+  D.done++; D.run++; D.best=Math.max(D.best,D.run); D.wrong=0; msg=null; clearHint(); tick(false);
+  if(D.run===15||D.run===40||D.run===80) heckle('streak',true);
+  distAdvance(); render(); return; }
+ if(S.foul&&!isSp(k)){ var f=s.f; flyTo($('track').querySelector('.sort[data-i="0"]'),b||box(k),s.k,f);
+  strayAdd(f,k,s.k); S.stick.shift(); D.astray=(D.astray||0)+1; D.done++; D.run=0; D.wrong=0; clearHint(); tick(false); msg=null;
+  if(S.foulMode!=='journeyman'){ var fb=b||box(k); if(fb){ fb.classList.add('foulflash'); setTimeout(function(){ fb.classList.remove('foulflash'); },850); }
+   say('The '+s.k+' dropped into the '+k+' box. It will stay there until you pick it out.','warn'); heckle('miss'); }
+  distAdvance(); render(); return; }
+ D.miss++; D.run=0; D.wrong++;
+ if(b){ b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); }
+ say((isSp(k)?'That box holds '+SP[k.slice(3)].n+'s.':'That is the '+k+' box.')+(D.wrong>=2?' The right box is glowing.':''),'warn');
+ if(D.wrong>=2){ var r=box(s.k); if(r) r.classList.add('hintbox'); }
+ heckle('miss'); renderStick(); save(); }
+function distFinish(){ var D=S.dist, secs=Math.max(1,Math.round((Date.now()-D.t0)/1000)), m=Math.floor(secs/60), sx=secs%60;
+ S.dist=null; S.stick=[]; S.sel=-1; S.example=false; clearHint();
+ var astray=D.astray||0, tell=S.foul&&S.foulMode!=='journeyman';
+ msg={t:'Distributed by hand: '+D.done+' sorts in '+(m?m+' min ':'')+sx+' sec, '+D.miss+(D.miss===1?' miss':' misses')+'.'+(tell&&astray?' '+astray+(astray===1?' sort went':' sorts went')+' into the wrong box.':'')+' Longest run without a miss: '+D.best+'.',c:'ok'};
+ clearTimeout(msgT); msgT=setTimeout(function(){msg=null; renderStick();},9000);
+ tick(true); heckle(tell&&astray?'distFoul':((D.miss||astray)?'distDone':'distClean'),true); }
+
+/* ---------- Tolliver's remarks ---------- */
+var AB={
+ out:["Out of sorts. That's where the saying comes from, and now you know how it feels.","Empty box. In my day we'd rob the next frame over and swear we never.","The English language ate all your sorts again."],
+ full:["It won't go. Type is metal, not India rubber.","A line is only so long. Same as a man's patience.","Lift out the half-word. Nobody wants half a word."],
+ loose:["Loose as a river-town land deal. Tighten it.","Carry that to the galley and you'll be picking up pi till Christmas.","A loose line is a lie told in lead. Justify it."],
+ dump:["Into the galley. Next.","That'll stand.","Tolerable.","I've seen worse. I've set worse."],
+ turn:["Poets never met a measure they couldn't overrun.","Turn her over and indent. The poet don't pay for the paper.","Long-winded copy. Poets are the worst for it, and preachers second."],
+ clean:["Clean proof. Don't let it go to your head.","Not a mark on it. The proofreader will be heartbroken.","Clean. I'll tell the proprietor you're fit to be underpaid."],
+ marked:["The proofreader's had himself a happy morning.","Blue pencil all over it. Back to the stick.","Every one of those marks is a sort you was too proud to look at twice."],
+ takeback:["Back in the stick with it. No shame. Some shame.","Correcting is half the trade. The other half is swearing you never made the error."],
+ distStart:["Now put every sort back where it lives. You read it upside down, same as you set it.","Distribution. It's how I learned the lay, and it's how you will."],
+ miss:["Wrong box. That's how a case gets dirty and a book gets its typos.","Look at it again. Upside down a b is a q, and a q will ruin you.","No. Try the box it actually lives in."],
+ streak:["Now you're cooking.","That's a compositor's rhythm. Don't think about it or you'll lose it.","Steady. Don't get proud."],
+ distClean:["Not a sort misplaced. You may yet amount to something.","Clean case. I'd shake your hand, but mine's full of ink."],
+ distDone:["Case is full again. Mind the ones you missed. That's how typos are born.","Done. Slower than me, but everybody is."],
+ quad:["Quad her out.","Blanks to the end of the line. Easiest work in the shop."],
+ goodeye:["Good eye. That's the one that would have shamed you in print.","Caught it in the stick. Cheaper than catching it on the proof.","There's a compositor's eye. Somebody fouled that case, and I won't say who."],
+ picked:["That's how a case gets clean: one sort at a time, and no complaining.","Picked out. Now it'll stay out of your proofs.","Clean as a Sunday collar."],
+ distFoul:["Some of those went home to the wrong address. You'll meet them again in the stick.","Case is full. Not all of it is where it ought to be."]
+};
+var ABP={dump:.3,miss:.45,quad:.3,full:.6,turn:.7,takeback:.6}, abIdx={}, abLast=0, abT=0;
+function heckle(kind,force){ if(!S.ab||demo||!AB[kind]) return; var now=Date.now();
+ if(!force){ if(now-abLast<9000) return; if(Math.random()>(ABP[kind]||1)) return; }
+ var list=AB[kind], i=abIdx[kind]==null?Math.floor(Math.random()*list.length):(abIdx[kind]+1)%list.length; abIdx[kind]=i; abLast=now;
+ var p=$('abSay'); p.textContent=''; p.appendChild(el('span',null,'☞')); p.appendChild(document.createTextNode(list[i])); p.hidden=false;
+ clearTimeout(abT); abT=setTimeout(function(){p.hidden=true},6500); }
+
+/* ---------- Copy the galley as plain text, one line of type to a line ---------- */
+function galleyText(){ return S.galley.map(function(a){ var s='',sp=false; a.forEach(function(x){ if(isSp(x.k)) sp=true; else { if(sp&&s) s+=' '; sp=false; s+=x.k; } }); return s; }).join('\n'); }
+function copyGalley(){ var t=galleyText(), bx=$('exportBox'); if(!t) return;
+ function fallback(){ bx.hidden=false; bx.value=t; bx.focus(); bx.select(); $('galleyNote').textContent='Your browser would not copy it directly. The text is selected below; copy it from there.'; }
+ try{ navigator.clipboard.writeText(t).then(function(){ bx.hidden=true; say('Copied the galley as plain text, one line of type to a line. Paste it into Sigla as a witness.','ok'); renderStick(); },fallback); }catch(e){ fallback(); } }
+
+/* ---------- Looking in a box: the sorts lie face up; pick out the one that does not belong ---------- */
+var pk=null;
+function setLooking(on){ looking=!!on; $('lookBtn').setAttribute('aria-pressed',looking?'true':'false'); renderStick(); }
+function openPeek(k){ if(S.dist||demo) return;
+ if(isSp(k)){ say('Spaces go back by themselves. They never foul.','ok'); renderStick(); return; }
+ var f=S.face, good=have(k,f)||0, st=strays(f,k), items=[], i;
+ for(i=0;i<Math.min(good,90);i++) items.push({l:k,bad:false});
+ st.forEach(function(l){ items.push({l:l,bad:true}); });
+ for(i=items.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=items[i]; items[i]=items[j]; items[j]=t; }
+ pk={k:k,f:f,items:items};
+ $('peekMsg').textContent=''; renderPeek(); $('peek').hidden=false; $('peekClose').focus(); }
+function renderPeek(){ if(!pk) return; var f=pk.f, k=pk.k, left=strays(f,k).length;
+ $('peekTitle').textContent='The '+k+' box, '+FACES[f].name;
+ var note=pk.items.length?'Look for the sort that does not belong, and tap it to put it back in its own box.':'The box is empty.';
+ if(S.foulMode==='forgiving') note+=left?(' '+left+(left===1?' foul sort is':' foul sorts are')+' in here.'):' This box is clean.';
+ $('peekNote').textContent=note;
+ var host=$('peekTiles'); host.textContent='';
+ pk.items.forEach(function(it,i){ var b=el('button','tile '+FACES[f].css+(it.l.length>1?' wide':''),it.l); b.type='button'; b.dataset.i=i;
+  b.style.transform='rotate('+(((i*37)%11)-5)+'deg)'; b.setAttribute('aria-label','sort '+it.l); host.appendChild(b); }); }
+function peekTap(i,b){ var it=pk&&pk.items[i]; if(!it) return;
+ if(!it.bad){ $('peekMsg').textContent='That one belongs here.'; if(!reduce){ b.classList.remove('no'); void b.offsetWidth; b.classList.add('no'); } return; }
+ var a=strays(pk.f,pk.k), q=a.indexOf(it.l); if(q>=0) a.splice(q,1);
+ S.counts[pk.f][it.l]=(S.counts[pk.f][it.l]||0)+1; pk.items.splice(i,1); tick(false);
+ $('peekMsg').textContent='Out comes the stray “'+it.l+'”. It goes back to its own box.'; heckle('picked');
+ renderPeek(); renderCase(); save(); }
+function closePeek(){ if(!pk) return; pk=null; $('peek').hidden=true; render(); }
+
+function toSorts(text,f){ var out=[], i=0, ligs=['ffi','ffl','ff','fi','fl']; text=text.replace(/[‘’]/g,"'");
+ while(i<text.length){ var k=null; if(text[i]===' '){ k='sp:3em'; i++; } else { for(var j=0;j<ligs.length;j++){ if(text.substr(i,ligs[j].length)===ligs[j]){k=ligs[j];break;} } if(!k) k=text[i]; i+=k.length; if(!ALL[k]) continue; }
+  var s={k:k,f:f,w:width(k,f)}; if((have(k,f)||0)>0){ give(s,-1); out.push(s); } } return out; }
+function seed(){ S.counts=freshCounts(); var a=toSorts('I celebrate myself,','roman'); quadOut(a,true); S.galley=[a]; S.stick=toSorts('And what I assume','roman'); S.example=true; }
+
+/* wiring */
+function wire(){
+ $('liftBtn').onclick=lift; $('quadBtn').onclick=function(){quadOut()}; $('turnBtn').onclick=turnOver; $('dumpBtn').onclick=dump; $('distBtn').onclick=distribute; $('handBtn').onclick=startHand; $('copyBtn').onclick=copyGalley;
+ $('abChk').onchange=function(){ S.ab=this.checked; if(!S.ab) $('abSay').hidden=true; save(); };
+ $('prevBtn').onclick=function(){step(-1)}; $('nextBtn').onclick=function(){step(1)};
+ $('track').parentNode.addEventListener('click',function(ev){ if(S.dist) return; var s=ev.target.closest('.sort'); if(s){ var i=+s.dataset.i; S.sel=(S.sel===i)?-1:i; } else S.sel=-1; renderStick(); });
+ $('bed').addEventListener('click',function(ev){ var l=ev.target.closest('.line'); if(l) takeBack(+l.dataset.l); });
+ $('tabType').onclick=function(){S.tab='type'; render();}; $('tabProof').onclick=function(){S.tab='proof'; tick(true); if(document.documentElement.classList.contains('bench')&&S.galley.length) setWide(true); render();};
+ $('bigBtn').onclick=function(){ setWide(!wide); };
+ $('markBtn').onclick=function(){S.marks=!S.marks; render(); if(S.marks&&S.galley.length) heckle(proofMarks().length?'marked':'clean',true); };
+ $('faceSeg').addEventListener('click',function(ev){ var b=ev.target.closest('button'); if(b){ S.face=b.dataset.f; render(); } });
+ $('measureSel').onchange=function(){S.measure=+this.value; render();};
+ $('leadSel').onchange=function(){S.lead=+this.value; render();};
+ $('aidChk').onchange=function(){S.aid=this.checked; render();};
+ $('soundChk').onchange=function(){S.sound=this.checked; save();};
+ $('blindChk').onchange=function(){S.blind=this.checked; render();};
+ $('foulChk').onchange=function(){ S.foul=this.checked; looking=false; syncFoul();
+  if(S.foul) say('Case fouling is on. A miss in distribution by hand leaves the sort in the box you tapped.','ok');
+  else { var n=cleanAll(); say('Case fouling is off.'+(n?' The strays went back to their own boxes.':''),'ok'); }
+  render(); };
+ $('foulSel').onchange=function(){ S.foulMode=this.value; render(); };
+ $('lookBtn').onclick=function(){ if(S.dist){ say('Finish distributing first.','warn'); renderStick(); return; } setLooking(!looking); };
+ $('peekClose').onclick=closePeek;
+ $('peek').addEventListener('click',function(ev){ if(ev.target===this){ closePeek(); return; } var t=ev.target.closest('.tile'); if(t) peekTap(+t.dataset.i,t); });
+ $('copySel').onchange=function(){S.copy=this.value; renderCopy(); save();};
+ $('ownCopy').oninput=function(){S.own=this.value; save();};
+ window.addEventListener('resize',function(){ applyLayout(); fit(); });
+ $('layoutSeg').addEventListener('click',function(ev){ var b=ev.target.closest('button'); if(!b) return; S.layout=b.dataset.l; applyLayout(); fit(); save(); });
+ var de=document.documentElement, fsOK=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+ $('fsBtn').hidden=!fsOK;
+ $('fsBtn').onclick=function(){ var on=document.fullscreenElement||document.webkitFullscreenElement;
+  try{ var r=on?(document.exitFullscreen||document.webkitExitFullscreen).call(document):(de.requestFullscreen||de.webkitRequestFullscreen).call(de);
+   if(r&&r.catch) r.catch(function(){ say('Full screen is not available in this view.','warn'); renderStick(); }); }catch(e){ say('Full screen is not available in this view.','warn'); renderStick(); } };
+ function fsChange(){ var on=!!(document.fullscreenElement||document.webkitFullscreenElement); $('fsBtn').textContent=on?'Exit full screen':'Full screen'; setTimeout(function(){applyLayout(); fit();},120); }
+ document.addEventListener('fullscreenchange',fsChange); document.addEventListener('webkitfullscreenchange',fsChange);
+ $('helpBtn').onclick=function(){ var h=$('help'); h.open=!h.open; if(h.open) h.scrollIntoView({block:'nearest'}); };
+ $('replayBtn').onclick=function(){ $('help').open=false; startDemo(); }; $('coachSkip').onclick=endDemo;
+ $('coachNext').onclick=function(){ if(!demo) return; if(demo.step>=STEPS.length-1) endDemo(); else runStep(demo.step+1); };
+ document.addEventListener('keydown',function(ev){ if(pk){ if(ev.key==='Escape') closePeek(); return; } if(ev.key==='Escape'&&looking){ setLooking(false); return; } if(ev.key==='Escape'&&wide){ setWide(false); return; } if(demo) return; if(S.dist&&(ev.key.length!==1||ev.key===' ')) return; var t=ev.target.tagName; if(t==='TEXTAREA'||t==='SELECT'||t==='INPUT'||ev.metaKey||ev.ctrlKey||ev.altKey) return;
+  if(ev.key==='Backspace'){ ev.preventDefault(); lift(); } else if(ev.key==='Enter'){ if(t!=='BUTTON'){ ev.preventDefault(); dump(); } }
+  else if(ev.key===' '){ if(t!=='BUTTON'){ ev.preventDefault(); pick('sp:3em'); } }
+  else if(ev.key==='ArrowLeft') step(-1); else if(ev.key==='ArrowRight') step(1);
+  else if(ev.key==='"'){ ev.preventDefault(); var ls=S.stick[S.stick.length-1]; if(!ls||isSp(ls.k)) pick('“'); else { pick("'"); pick("'"); } }
+  else if(ev.key.length===1){ var k=ev.key==='’'?"'":ev.key; if(ALL[k]){ ev.preventDefault(); pick(k,$('case').querySelector('.box[data-k="'+(k==='"'?'':k.replace(/\\/g,''))+'"]')); } } });
+}
+function applyLayout(){ var big=innerWidth>=700&&innerHeight>=540;
+ document.documentElement.classList.toggle('bench',big&&S.layout!=='scroll');
+ $('layoutField').hidden=!big;
+ $('layoutSeg').querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed',b.dataset.l===(S.layout||'fit')?'true':'false'); }); }
+function syncControls(){ $('abChk').checked=S.ab; $('measureSel').value=S.measure; $('leadSel').value=S.lead; $('aidChk').checked=S.aid; $('soundChk').checked=S.sound; $('blindChk').checked=S.blind; syncFoul(); }
+function syncFoul(){ $('foulChk').checked=!!S.foul; $('foulSel').value=S.foulMode||'standard'; $('foulSel').hidden=!S.foul; $('lookBtn').hidden=!S.foul;
+ $('lookBtn').setAttribute('aria-pressed',looking?'true':'false'); }
+
+/* ---------- The foreman's lesson: sets two lines itself, showing every tap ---------- */
+var demo=null, SEEN='composing-room-lesson-seen', STOP={};
+var DEMO="Mind your p's and q's, and keep your stick tight and your case clean.";
+var hand=null;
+function keysOf(t){ var out=[],i=0,ligs=['ffi','ffl','ff','fi','fl']; while(i<t.length){ if(t[i]===' '){out.push('sp:3em');i++;continue;}
+ var k=null; for(var j=0;j<ligs.length;j++) if(t.substr(i,ligs[j].length)===ligs[j]){k=ligs[j];break;} if(!k) k=t[i]; i+=k.length; if(ALL[k]) out.push(k); } return out; }
+function wOf(keys){ var t=0; keys.forEach(function(k){t+=width(k,'roman')}); return t; }
+function live(id){ if(!demo||demo.id!==id) throw STOP; }
+function sleep(ms,id){ return new Promise(function(r){setTimeout(r,ms)}).then(function(){live(id)}); }
+function ensureVisible(e){ var sp=document.querySelector('.stickpane');
+ for(var k=0;k<3;k++){ var r=e.getBoundingClientRect(), s=sp.getBoundingClientRect(), lim=(!sp.contains(e)&&s.top<=2)?s.bottom:0;
+  if(r.top<lim+8) window.scrollBy(0,r.top-lim-8); else if(r.bottom>innerHeight-8) window.scrollBy(0,r.bottom-innerHeight+8); else break; } }
+function point(e,id,fast){ ensureVisible(e); var r=e.getBoundingClientRect(); hand.hidden=false;
+ hand.style.transform='translate('+(r.left+r.width/2-15)+'px,'+(r.top+r.height/2-15)+'px)'; return sleep(fast?30:110,id); }
+function tap(e,id,fast){ return point(e,id,fast).then(function(){ hand.classList.remove('tap'); void hand.offsetWidth; hand.classList.add('tap'); e.click(); return sleep(fast?25:70,id); }); }
+function box(k){ return $('case').querySelector('.box[data-k="'+k+'"]'); }
+async function setKeys(keys,id,fast){ for(var i=0;i<keys.length;i++) await tap(box(keys[i]),id,fast); }
+function gapsNow(){ var g=[]; for(var i=1;i<S.stick.length;i++) if(isSp(S.stick[i].k)&&!isSp(S.stick[i-1].k)) g.push(i); return g; }
+
+var STEPS=[
+ {say:"Name's Absalom Tolliver. Journeyman printer, late of more shops than I care to count, most of which still owe me wages. The proprietor says I'm to learn you the case, so sit still and watch my hands. I go a sight faster than you will, and that is the natural order of things."},
+ {say:"That's a California job case. Small letters in the two left bays, capitals on the right. The e gets the biggest box because the English language can't stand up without it. J and U sit at the end, after Z, on account of they came late to the alphabet and had to take what was left. Real cases ain't labeled. You learn the lay or you go hungry.",
+  act:async function(id){ await point(box('e'),id); await sleep(700,id); await point(box('J'),id); await sleep(400,id); await point(box('U'),id); await sleep(500,id); hand.hidden=true; }},
+ {say:"I take a sort and it goes in the stick, upside down, reading left to right. A printer reads backwards and upside down from the cradle, which accounts for most of what's wrong with us. Watch the copy on the hook: we're setting that.",
+  act:async function(id){ await setKeys(keysOf('Mind your'),id); }},
+ {say:"Between words goes a 3-em space, a third as thick as the body. Spaces don't print. They just keep the words from crowding one another, same as a decent boarding house.",
+  act:async function(id){ await setKeys(keysOf(" p's"),id); }},
+ {say:"Now I set till the next word won't go in. There. A lesser man would jam it in anyhow. A printer don't.",
+  act:async function(id){ var words=DEMO.split(' '), i=3;
+   for(;i<words.length;i++){ var ks=['sp:3em'].concat(keysOf(words[i])); if(wOf(ks)>free()+0.2) break; await setKeys(ks,id,true); }
+   demo.split=i; if(i<words.length){ await point(box(keysOf(words[i])[0]),id); await sleep(600,id); } hand.hidden=true; }},
+ {say:"So I justify. Tap a space in the stick to mark it, then drop a thin space in beside it. Spread the slack among all the words, fair and even, like a good mother with the gravy. Once you've got the knack it goes quick.",
+  act:async function(id){ var order=['3em','4em','5em','brass','copper'], g=0, n=0;
+   while(free()>=0.6){ var k=null; for(var q=0;q<order.length;q++) if(SP[order[q]].w<=free()+0.001&&S.counts.sp[order[q]]>0){k=order[q];break;} if(!k) break;
+    var gaps=gapsNow(); if(!gaps.length) break; var at=gaps[g%gaps.length]; g++;
+    var se=$('track').querySelector('.sort[data-i="'+at+'"]'); var fast=n++>=2;
+    await tap(se,id,fast); await tap(box('sp:'+k),id,fast); }
+   if(S.sel>=0){ S.sel=-1; renderStick(); } hand.hidden=true; }},
+ {say:"Tight as a drum. Into the galley she goes. A loose line pies on the way over, and then you're down on your knees picking the alphabet out of the sawdust one letter at a time.",
+  act:async function(id){ await tap($('dumpBtn'),id); hand.hidden=true; }},
+ {say:"The end of a paragraph don't fill the measure, so you quad it out with blanks. And I'll make a mistake on purpose, watch close. I'm the only man in this shop who makes them on purpose.",
+  act:async function(id){ var words=DEMO.split(' ').slice(demo.split), last=words.length-1; words[last]=words[last].replace('clean','clan');
+   await setKeys(keysOf(words.join(' ')),id,true); await tap($('quadBtn'),id); await tap($('dumpBtn'),id); hand.hidden=true; }},
+ {say:"Now pull a proof and read it against the copy. The proofreader rings what's wrong and writes what's wanted in the margin, and he enjoys it more than is decent. There's my e, gone missing.",
+  act:async function(id){ await tap($('tabProof'),id); await tap($('markBtn'),id); hand.hidden=true; }},
+ {say:"Take the line back into the stick. Lift out a quad to make room, mark the l, drop in the e, quad out again, and she goes back to the galley right where she came from. Clean proof. That's how it's done.",
+  act:async function(id){ await tap($('tabType'),id); await tap($('bed').querySelector('.line[data-l="1"]'),id);
+   var need=width('e','roman'); while(S.stick.length&&isSp(S.stick[S.stick.length-1].k)&&free()<need+0.1) await tap($('liftBtn'),id,true);
+   var li=-1; for(var i=1;i<S.stick.length-1;i++) if(S.stick[i].k==='l'&&S.stick[i-1].k==='c'&&S.stick[i+1].k==='a') li=i;
+   if(li>=0){ await tap($('track').querySelector('.sort[data-i="'+li+'"]'),id); await tap(box('e'),id); await tap($('track').querySelector('.sort[data-i="'+S.sel+'"]'),id); }
+   await tap($('quadBtn'),id); await tap($('dumpBtn'),id); await tap($('tabProof'),id); hand.hidden=true; }},
+ {say:"That's the whole trade, near enough. When you're done, distribute by hand and put every sort back in its box; that's how I learned the lay. The rest is twenty years and bad coffee. Mind your p's and q's: upside down they look alike, and they will make a fool of you."}
+];
+async function runStep(i){ if(!demo) return; var id=demo.id; demo.step=i;
+ $('coachSay').textContent=STEPS[i].say; $('coachStep').textContent=(i+1)+' of '+STEPS.length;
+ var nx=$('coachNext'); nx.disabled=true; nx.textContent='Watch…';
+ try{ if(STEPS[i].act) await STEPS[i].act(id); }catch(e){ if(e!==STOP) console.error(e); }
+ if(!demo||demo.id!==id) return; nx.disabled=false; nx.textContent=i===STEPS.length-1?'Let me at it':'Next'; }
+function startDemo(){ if(demo) return; setWide(false); try{localStorage.setItem(SEEN,'1')}catch(e){}
+ demo={snap:JSON.stringify(S),id:Date.now(),step:0,split:0};
+ var fresh={face:'roman',measure:20,lead:2,aid:false,blind:false,copy:'own',own:DEMO,stick:[],sel:-1,galley:[],counts:freshCounts(),tab:'type',example:false,from:null,marks:false,dist:null,foul:false,strays:{}};
+ clearHint(); $('abSay').hidden=true; looking=false; if(pk){ pk=null; $('peek').hidden=true; }
+ for(var k in fresh) S[k]=fresh[k]; msg=null; armed=false;
+ if(!hand){ hand=el('div'); hand.id='hand'; hand.hidden=true; document.body.appendChild(hand); }
+ document.body.classList.add('demo'); $('coach').hidden=false; syncControls(); renderCopy(); render();
+ var top=document.querySelector('.upper').getBoundingClientRect().top+window.scrollY-10; window.scrollTo(0,Math.max(0,top));
+ runStep(0); }
+function endDemo(){ if(!demo) return; var snap=JSON.parse(demo.snap); demo=null;
+ for(var k in snap) if(k in S) S[k]=snap[k]; msg=null; if(hand) hand.hidden=true;
+ document.body.classList.remove('demo'); $('coach').hidden=true; syncControls(); renderCopy(); render(); }
+
+function start(){
+ if(!load()) seed();
+ syncControls(); buildCase(); wire(); applyLayout(); renderCopy(); render();
+ var seen=false; try{ seen=localStorage.getItem(SEEN)==='1'; }catch(e){}
+ if(!seen) startDemo();
+}
+var waits=[]; try{ if(document.fonts&&document.fonts.load) Object.keys(FACES).forEach(function(f){ waits.push(document.fonts.load(FACES[f].ld,'aeffi').catch(function(){})); }); }catch(e){}
+var started=false; function go(){ if(started) return; started=true; start(); }
+Promise.all(waits).then(function(){ go(); remeasure(); render(); }); setTimeout(go,2500);
+})();
+</script>
+
+</body></html>
